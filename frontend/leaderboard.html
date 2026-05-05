@@ -33,6 +33,11 @@
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody">
+                    <tr>
+                        <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                            Loading participants...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -43,35 +48,51 @@
     </div>
 
     <script>
-        const participants = JSON.parse(localStorage.getItem('aeroRideParticipants')) || [];
+        const API_URL = "http://127.0.0.1:8000";
 
-        // Sort by Strava score (highest first)
-        participants.sort((a, b) => b.stravaScore - a.stravaScore);
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch(`${API_URL}/participants/`);
+                const data = await response.json();
 
-        document.getElementById('totalCount').innerText = participants.length;
+                document.getElementById('totalCount').innerText = data.total;
 
-        const tbody = document.getElementById('leaderboardBody');
+                const tbody = document.getElementById('leaderboardBody');
 
-        if (participants.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">
-                        No participants registered yet.
-                    </td>
-                </tr>`;
-        } else {
-            participants.forEach((p, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="rank-number">${index + 1}</td>
-                    <td>${p.firstName} ${p.lastName}</td>
-                    <td style="color: var(--primary-blue); font-weight: bold;">${p.stravaScore}</td>
-                    <td>${p.level}</td>
-                    <td>${p.bikeStatus}</td>
-                `;
-                tbody.appendChild(row);
-            });
+                if (data.participants.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                                No participants registered yet.
+                            </td>
+                        </tr>`;
+                } else {
+                    tbody.innerHTML = '';
+                    data.participants.forEach((p, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="rank-number">${index + 1}</td>
+                            <td>${p.firstName} ${p.lastName}</td>
+                            <td style="color: var(--primary-blue); font-weight: bold;">${p.stravaScore}</td>
+                            <td>${p.level}</td>
+                            <td>${p.bikeStatus}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+
+            } catch (error) {
+                console.error("Could not load leaderboard:", error);
+                document.getElementById('leaderboardBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; color: var(--neon-pink); padding: 30px;">
+                            Error loading data. Make sure the backend is running.
+                        </td>
+                    </tr>`;
+            }
         }
+
+        loadLeaderboard();
     </script>
 </body>
 </html>

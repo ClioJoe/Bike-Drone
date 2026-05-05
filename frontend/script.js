@@ -1,3 +1,5 @@
+const API_URL = "http://127.0.0.1:8000";
+
 // Toggle bike rent size
 function toggleRentSize(isRenting) {
     const rentSizeGroup = document.getElementById('rentSizeGroup');
@@ -13,24 +15,22 @@ function toggleRentSize(isRenting) {
 }
 
 // Load participant count on page load
-document.addEventListener('DOMContentLoaded', () => {
-    const participants = JSON.parse(localStorage.getItem('aeroRideParticipants')) || [];
-    const countElement = document.getElementById('count');
-    if (countElement) {
-        countElement.innerText = participants.length;
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch(`${API_URL}/participants/`);
+        const data = await response.json();
+        const countElement = document.getElementById('count');
+        if (countElement) {
+            countElement.innerText = data.total;
+        }
+    } catch (error) {
+        console.error("Could not load participant count:", error);
     }
 });
 
 // Form submission
-document.getElementById('registrationForm')?.addEventListener('submit', function(e) {
+document.getElementById('registrationForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
-
-    let participants = JSON.parse(localStorage.getItem('aeroRideParticipants')) || [];
-
-    if (participants.length >= 50) {
-        alert("ACCESS DENIED: Registration is full. Maximum 50 participants reached.");
-        return;
-    }
 
     const isRenting = document.querySelector('input[name="bike"]:checked').value === 'rent';
 
@@ -38,15 +38,31 @@ document.getElementById('registrationForm')?.addEventListener('submit', function
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
         stravaScore: parseInt(document.getElementById('stravaScore').value),
-        weight: document.getElementById('weight').value,
+        weight: parseFloat(document.getElementById('weight').value),
         level: document.getElementById('level').value,
         bikeStatus: isRenting ? `Renting (${document.getElementById('bikeSize').value})` : 'Own Bike',
         needs: document.getElementById('otherNeeds').value,
         droneConsent: document.getElementById('droneConsent').checked
     };
 
-    participants.push(newParticipant);
-    localStorage.setItem('aeroRideParticipants', JSON.stringify(participants));
+    try {
+        const response = await fetch(`${API_URL}/participants/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newParticipant)
+        });
 
-    window.location.href = 'leaderboard.html';
+        const data = await response.json();
+
+        if (data.error) {
+            alert("ACCESS DENIED: " + data.error);
+            return;
+        }
+
+        window.location.href = 'leaderboard.html';
+
+    } catch (error) {
+        alert("Server error. Make sure the backend is running.");
+        console.error(error);
+    }
 });
