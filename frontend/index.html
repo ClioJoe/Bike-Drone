@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroRide | Drone Cycling Event</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AERORIDE <span>2026</span></h1>
+            <p class="subtitle">DRONE-TRACKED NATURE CYCLING EVENT</p>
+            
+            <div class="event-details">
+                <p><strong>DATE:</strong> June 4, 2026 | 18:00 - 20:00</p>
+                <p><strong>LOCATION:</strong> TalTech, Tallinn</p>
+            </div>
+
+            <div class="status-bar">PARTICIPANTS: <span id="count">0</span> / 50</div>
+        </header>
+
+        <form id="registrationForm" class="tech-form">
+            <div class="form-group row">
+                <div class="col">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="col">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" required>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col">
+                    <label>Strava Score (Points/Level)</label>
+                    <input type="number" id="stravaScore" required>
+                </div>
+                <div class="col">
+                    <label>Weight (kg)</label>
+                    <input type="number" id="weight" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Experience Level</label>
+                <select id="level" required>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+
+            <div class="form-group equipment-section">
+                <label>Equipment Status (Mandatory)</label>
+                <p class="helper-text">* Participants must either bring their own bicycle or rent one.</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="bike" value="own" checked onchange="toggleRentSize(false)"> I have my own bicycle</label>
+                    <label><input type="radio" name="bike" value="rent" onchange="toggleRentSize(true)"> I need to rent a bicycle</label>
+                </div>
+                
+                <div id="rentSizeGroup" class="hidden" style="margin-top: 15px;">
+                    <label>Select Bicycle Size</label>
+                    <select id="bikeSize">
+                        <option value="S">Small (S)</option>
+                        <option value="M">Medium (M)</option>
+                        <option value="L">Large (L)</option>
+                        <option value="XL">Extra Large (XL)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Other Needs / Medical Info</label>
+                <textarea id="otherNeeds" rows="3" placeholder="Any specific requirements..."></textarea>
+            </div>
+
+            <div class="form-group consent-section">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="droneConsent" required>
+                    <span><strong>IMAGE RIGHTS CONSENT:</strong> I agree to be filmed by drones during the event and authorize the use of my image for promotional materials.</span>
+                </label>
+            </div>
+
+            <button type="submit" class="cyber-btn">INITIALIZE REGISTRATION</button>
+        </form>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
