@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroRide | BI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #030a16;
+            --panel-bg: rgba(7, 18, 40, 0.85);
+            --primary-blue: #00d2ff;
+            --neon-pink: #ff007f;
+            --text-main: #e0eaff;
+            --text-muted: #6b82b8;
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 2rem;
+            color: var(--primary-blue);
+            letter-spacing: 3px;
+        }
+
+        h1 span { color: var(--neon-pink); }
+
+        .subtitle {
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-family: var(--font-head);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-family: var(--font-head);
+            font-size: 2rem;
+            color: var(--primary-blue);
+        }
+
+        .stat-card.pink p { color: var(--neon-pink); }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .chart-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 0, 127, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        .chart-card h3 {
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            color: var(--neon-pink);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            border: 1px solid var(--primary-blue);
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-blue);
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <a href="../frontend/index.html" class="back-btn">← BACK TO REGISTRATION</a>
+
+    <header>
+        <h1>AERORIDE <span>BI DASHBOARD</span></h1>
+        <p class="subtitle">EVENT ANALYTICS — REAL TIME</p>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>TOTAL PARTICIPANTS</h3>
+            <p id="totalCount">0</p>
+        </div>
+        <div class="stat-card pink">
+            <h3>SPOTS REMAINING</h3>
+            <p id="spotsLeft">50</p>
+        </div>
+        <div class="stat-card">
+            <h3>AVG STRAVA SCORE</h3>
+            <p id="avgStrava">0</p>
+        </div>
+        <div class="stat-card pink">
+            <h3>BIKE RENTALS</h3>
+            <p id="rentCount">0</p>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>PARTICIPANTS BY LEVEL</h3>
+            <canvas id="levelChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>BIKE STATUS</h3>
+            <canvas id="bikeChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>STRAVA SCORE DISTRIBUTION</h3>
+            <canvas id="stravaChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>WEIGHT DISTRIBUTION (kg)</h3>
+            <canvas id="weightChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+
+        async function loadDashboard() {
+            const response = await fetch(`${API_URL}/participants/`);
+            const data = await response.json();
+            const participants = data.participants;
+
+            // Stats cards
+            document.getElementById('totalCount').innerText = data.total;
+            document.getElementById('spotsLeft').innerText = 50 - data.total;
+
+            const avgStrava = participants.length > 0
+                ? Math.round(participants.reduce((sum, p) => sum + p.stravaScore, 0) / participants.length)
+                : 0;
+            document.getElementById('avgStrava').innerText = avgStrava;
+
+            const rentCount = participants.filter(p => p.bikeStatus.includes('Renting')).length;
+            document.getElementById('rentCount').innerText = rentCount;
+
+            // Level chart
+            const levels = { Beginner: 0, Intermediate: 0, Advanced: 0 };
+            participants.forEach(p => levels[p.level]++);
+
+            new Chart(document.getElementById('levelChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(levels),
+                    datasets: [{
+                        data: Object.values(levels),
+                        backgroundColor: ['#00d2ff', '#ff007f', '#7b2fff'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
+            });
+
+            // Bike chart
+            const ownBike = participants.filter(p => p.bikeStatus === 'Own Bike').length;
+            new Chart(document.getElementById('bikeChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Own Bike', 'Renting'],
+                    datasets: [{
+                        data: [ownBike, rentCount],
+                        backgroundColor: ['#00d2ff', '#ff007f'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
+            });
+
+            // Strava chart
+            new Chart(document.getElementById('stravaChart'), {
+                type: 'bar',
+                data: {
+                    labels: participants.map(p => `${p.firstName} ${p.lastName}`),
+                    datasets: [{
+                        label: 'Strava Score',
+                        data: participants.map(p => p.stravaScore),
+                        backgroundColor: '#00d2ff',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: { legend: { labels: { color: '#e0eaff' } } },
+                    scales: {
+                        x: { ticks: { color: '#6b82b8' } },
+                        y: { ticks: { color: '#6b82b8' } }
+                    }
+                }
+            });
+
+            // Weight chart
+            new Chart(document.getElementById('weightChart'), {
+                type: 'bar',
+                data: {
+                    labels: participants.map(p => `${p.firstName} ${p.lastName}`),
+                    datasets: [{
+                        label: 'Weight (kg)',
+                        data: participants.map(p => p.weight),
+                        backgroundColor: '#ff007f',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: { legend: { labels: { color: '#e0eaff' } } },
+                    scales: {
+                        x: { ticks: { color: '#6b82b8' } },
+                        y: { ticks: { color: '#6b82b8' } }
+                    }
+                }
+            });
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>
