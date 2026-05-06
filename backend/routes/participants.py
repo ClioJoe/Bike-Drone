@@ -1,26 +1,56 @@
-from fastapi import APIRouter
-from models.participant import Participant
-from typing import List
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from database import SessionLocal, Participant
+from models.participant import Participant as ParticipantModel
 
 router = APIRouter()
 
-# Temporary storage (will be replaced by database later)
-participants_db: List[dict] = []
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @router.get("/")
-def get_participants():
-    sorted_participants = sorted(participants_db, key=lambda x: x["stravaScore"], reverse=True)
-    return {"total": len(sorted_participants), "participants": sorted_participants}
+def get_participants(db: Session = Depends(get_db)):
+    participants = db.query(Participant).order_by(Participant.stravaScore.desc()).all()
+    return {"total": len(participants), "participants": [
+        {
+            "firstName": p.firstName,
+            "lastName": p.lastName,
+            "stravaScore": p.stravaScore,
+            "weight": p.weight,
+            "level": p.level,
+            "bikeStatus": p.bikeStatus,
+            "needs": p.needs,
+            "droneConsent": p.droneConsent
+        } for p in participants
+    ]}
 
 @router.post("/register")
-def register_participant(participant: Participant):
-    if len(participants_db) >= 50:
+def register_participant(participant: ParticipantModel, db: Session = Depends(get_db)):
+    count = db.query(Participant).count()
+    if count >= 50:
         return {"error": "Registration is full. Maximum 50 participants reached."}
     
-    participants_db.append(participant.dict())
+    new_participant = Participant(
+        firstName=participant.firstName,
+        lastName=participant.lastName,
+        stravaScore=participant.stravaScore,
+        weight=participant.weight,
+        level=participant.level,
+        bikeStatus=participant.bikeStatus,
+        needs=participant.needs,
+        droneConsent=participant.droneConsent
+    )
+    db.add(new_participant)
+    db.commit()
+    db.refresh(new_participant)
     return {"message": "Registration successful!", "participant": participant}
 
 @router.delete("/reset")
-def reset_participants():
-    participants_db.clear()
+def reset_participants(db: Session = Depends(get_db)):
+    db.query(Participant).delete()
+    db.commit()
     return {"message": "All participants cleared."}

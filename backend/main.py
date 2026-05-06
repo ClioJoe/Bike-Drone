@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.participants import router as participants_router
+from database import create_tables
 
 app = FastAPI(title="Bike-Drone API")
 
-# Allow frontend to communicate with backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -12,7 +12,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routes
+@app.on_event("startup")
+def startup():
+    create_tables()
+
 app.include_router(participants_router, prefix="/participants")
 
 @app.get("/")
