@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroRide | Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav style="background: rgba(7,18,40,0.95); padding: 12px 30px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid rgba(0,210,255,0.3); position: sticky; top: 0; z-index: 999;">
+    <a href="/frontend/index.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏠 REGISTRATION</a>
+    <a href="/frontend/leaderboard.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏆 LEADERBOARD</a>
+    <a href="/dashboard/index.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">📊 DASHBOARD</a>
+    <a href="/frontend/admin.html" style="color: #ff007f; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">⚙️ ADMIN</a>
+</nav>
+
+<div class="container">
+    <header>
+        <h1>AERORIDE <span>ADMIN</span></h1>
+        <p class="subtitle">PARTICIPANT MANAGEMENT</p>
+        <div class="status-bar">
+            TOTAL: <span id="totalCount">0</span> / 50
+        </div>
+    </header>
+
+    <!-- Password Protection -->
+    <div id="loginSection">
+        <div class="form-group">
+            <label>ADMIN PASSWORD</label>
+            <input type="password" id="adminPassword" placeholder="Enter admin password...">
+        </div>
+        <button onclick="checkPassword()" class="cyber-btn">ACCESS ADMIN PANEL</button>
+    </div>
+
+    <!-- Admin Content -->
+    <div id="adminContent" class="hidden">
+
+        <button onclick="resetAll()" class="cyber-btn" style="margin-bottom: 20px; border-color: #ff007f; color: #ff007f;">
+            ⚠️ RESET ALL PARTICIPANTS
+        </button>
+
+        <div class="table-container">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Strava Score</th>
+                        <th>Level</th>
+                        <th>Bike</th>
+                        <th>Weight</th>
+                        <th>Needs</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    <tr>
+                        <td colspan="8" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                            Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "/api";
+    const ADMIN_PASSWORD = "aeroride2026";
+
+    function checkPassword() {
+        const password = document.getElementById('adminPassword').value;
+        if (password === ADMIN_PASSWORD) {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('adminContent').classList.remove('hidden');
+            loadParticipants();
+        } else {
+            alert("ACCESS DENIED: Wrong password.");
+        }
+    }
+
+    async function loadParticipants() {
+        try {
+            const response = await fetch(`${API_URL}/participants/`);
+            const data = await response.json();
+            document.getElementById('totalCount').innerText = data.total;
+
+            const tbody = document.getElementById('adminTableBody');
+
+            if (data.participants.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                            No participants yet.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.participants.forEach((p, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="rank-number">${index + 1}</td>
+                    <td>${p.firstName} ${p.lastName}</td>
+                    <td style="color: var(--primary-blue);">${p.stravaScore}</td>
+                    <td>${p.level}</td>
+                    <td>${p.bikeStatus}</td>
+                    <td>${p.weight} kg</td>
+                    <td>${p.needs || '-'}</td>
+                    <td>
+                        <button onclick="deleteParticipant(${p.id})" 
+                            style="background: transparent; border: 1px solid #ff007f; color: #ff007f; padding: 5px 10px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 0.7rem;">
+                            DELETE
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (error) {
+            console.error("Error loading participants:", error);
+        }
+    }
+
+    async function deleteParticipant(id) {
+        if (!confirm("Are you sure you want to delete this participant?")) return;
+        try {
+            await fetch(`${API_URL}/participants/${id}`, { method: 'DELETE' });
+            loadParticipants();
+        } catch (error) {
+            console.error("Error deleting participant:", error);
+        }
+    }
+
+    async function resetAll() {
+        if (!confirm("⚠️ Are you sure you want to DELETE ALL participants?")) return;
+        try {
+            await fetch(`${API_URL}/participants/reset`, { method: 'DELETE' });
+            loadParticipants();
+        } catch (error) {
+            console.error("Error resetting participants:", error);
+        }
+    }
+</script>
+</body>
+</html>

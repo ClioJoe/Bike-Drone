@@ -66,3 +66,12 @@ def get_routes(level: str = "intermediate"):
 def generate_single_route(level: str = "intermediate", duration: int = 60):
     route = generate_route(level, duration)
     return {"route": route}
+
+@router.delete("/{participant_id}")
+def delete_participant(participant_id: int, db: Session = Depends(get_db)):
+    participant = db.query(Participant).filter(Participant.id == participant_id).first()
+    if not participant:
+        return {"error": "Participant not found"}
+    db.delete(participant)
+    db.commit()
+    return {"message": "Participant deleted successfully"}
