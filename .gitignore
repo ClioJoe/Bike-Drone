@@ -428,3 +428,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 .env
+backend/.env
+backend/*.db
