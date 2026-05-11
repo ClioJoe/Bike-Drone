@@ -8,6 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<nav style="background: rgba(7,18,40,0.95); padding: 12px 30px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid rgba(0,210,255,0.3); position: sticky; top: 0; z-index: 999;">
+    <a href="index.html" style="color: #ff007f; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏠 REGISTRATION</a>
+    <a href="leaderboard.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏆 LEADERBOARD</a>
+    <a href="../dashboard/index.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">📊 DASHBOARD</a>
+</nav>
+
     <div class="container">
         <header>
             <h1>AERORIDE <span>2026</span></h1>
@@ -17,9 +24,14 @@
                 <p><strong>DATE:</strong> June 4, 2026 | 18:00 - 20:00</p>
                 <p><strong>LOCATION:</strong> TalTech, Tallinn</p>
             </div>
-
             <div class="status-bar">PARTICIPANTS: <span id="count">0</span> / 50</div>
         </header>
+
+        <div id="alreadyRegistered" class="hidden" style="background: rgba(0,210,255,0.1); border: 1px solid #00d2ff; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
+            <p style="font-family: 'Orbitron', sans-serif; color: #00d2ff; font-size: 1rem;">✅ YOU ARE ALREADY REGISTERED!</p>
+            <p style="color: #e0eaff; margin-top: 8px;">Welcome back! Check your position on the leaderboard.</p>
+            <a href="leaderboard.html" style="display: inline-block; margin-top: 15px; color: #ff007f; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; border: 1px solid #ff007f; padding: 10px 20px; text-decoration: none;">VIEW LEADERBOARD →</a>
+        </div>
 
         <form id="registrationForm" class="tech-form">
             <div class="form-group row">
@@ -32,7 +44,6 @@
                     <input type="text" id="lastName" required>
                 </div>
             </div>
-
             <div class="form-group row">
                 <div class="col">
                     <label>Strava Score (Points/Level)</label>
@@ -43,7 +54,6 @@
                     <input type="number" id="weight" required>
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Experience Level</label>
                 <select id="level" required>
@@ -52,7 +62,6 @@
                     <option value="Advanced">Advanced</option>
                 </select>
             </div>
-
             <div class="form-group equipment-section">
                 <label>Equipment Status (Mandatory)</label>
                 <p class="helper-text">* Participants must either bring their own bicycle or rent one.</p>
@@ -60,7 +69,6 @@
                     <label><input type="radio" name="bike" value="own" checked onchange="toggleRentSize(false)"> I have my own bicycle</label>
                     <label><input type="radio" name="bike" value="rent" onchange="toggleRentSize(true)"> I need to rent a bicycle</label>
                 </div>
-                
                 <div id="rentSizeGroup" class="hidden" style="margin-top: 15px;">
                     <label>Select Bicycle Size</label>
                     <select id="bikeSize">
@@ -71,19 +79,16 @@
                     </select>
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Other Needs / Medical Info</label>
                 <textarea id="otherNeeds" rows="3" placeholder="Any specific requirements..."></textarea>
             </div>
-
             <div class="form-group consent-section">
                 <label class="checkbox-label">
                     <input type="checkbox" id="droneConsent" required>
                     <span><strong>IMAGE RIGHTS CONSENT:</strong> I agree to be filmed by drones during the event and authorize the use of my image for promotional materials.</span>
                 </label>
             </div>
-
             <button type="submit" class="cyber-btn">INITIALIZE REGISTRATION</button>
         </form>
     </div>

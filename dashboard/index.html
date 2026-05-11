@@ -25,7 +25,7 @@
             color: var(--text-main);
             font-family: var(--font-body);
             min-height: 100vh;
-            padding: 30px;
+            padding: 0;
         }
 
         body::before {
@@ -37,6 +37,10 @@
                 linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
             background-size: 30px 30px;
             z-index: -1;
+        }
+
+        .content {
+            padding: 30px;
         }
 
         header {
@@ -112,30 +116,17 @@
             letter-spacing: 1px;
             margin-bottom: 20px;
         }
-
-        .back-btn {
-            display: inline-block;
-            margin-bottom: 30px;
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-family: var(--font-head);
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            border: 1px solid var(--primary-blue);
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: var(--primary-blue);
-            color: #000;
-        }
     </style>
 </head>
 <body>
-    <a href="../frontend/index.html" class="back-btn">← BACK TO REGISTRATION</a>
 
+<nav style="background: rgba(7,18,40,0.95); padding: 12px 30px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid rgba(0,210,255,0.3); position: sticky; top: 0; z-index: 999;">
+    <a href="../frontend/index.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏠 REGISTRATION</a>
+    <a href="../frontend/leaderboard.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏆 LEADERBOARD</a>
+    <a href="index.html" style="color: #ff007f; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">📊 DASHBOARD</a>
+</nav>
+
+<div class="content">
     <header>
         <h1>AERORIDE <span>BI DASHBOARD</span></h1>
         <p class="subtitle">EVENT ANALYTICS — REAL TIME</p>
@@ -178,6 +169,7 @@
             <canvas id="weightChart"></canvas>
         </div>
     </div>
+</div>
 
     <script>
         const API_URL = "/api";
@@ -187,7 +179,6 @@
             const data = await response.json();
             const participants = data.participants;
 
-            // Stats cards
             document.getElementById('totalCount').innerText = data.total;
             document.getElementById('spotsLeft').innerText = 50 - data.total;
 
@@ -199,7 +190,6 @@
             const rentCount = participants.filter(p => p.bikeStatus.includes('Renting')).length;
             document.getElementById('rentCount').innerText = rentCount;
 
-            // Level chart
             const levels = { Beginner: 0, Intermediate: 0, Advanced: 0 };
             participants.forEach(p => levels[p.level]++);
 
@@ -216,7 +206,6 @@
                 options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
             });
 
-            // Bike chart
             const ownBike = participants.filter(p => p.bikeStatus === 'Own Bike').length;
             new Chart(document.getElementById('bikeChart'), {
                 type: 'pie',
@@ -231,7 +220,6 @@
                 options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
             });
 
-            // Strava chart
             new Chart(document.getElementById('stravaChart'), {
                 type: 'bar',
                 data: {
@@ -252,7 +240,6 @@
                 }
             });
 
-            // Weight chart
             new Chart(document.getElementById('weightChart'), {
                 type: 'bar',
                 data: {

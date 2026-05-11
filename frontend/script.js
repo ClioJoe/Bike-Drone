@@ -14,6 +14,27 @@ function toggleRentSize(isRenting) {
     }
 }
 
+// Check if already registered
+async function checkAlreadyRegistered() {
+    const savedName = localStorage.getItem('aeroRideUser');
+    if (!savedName) return;
+
+    try {
+        const response = await fetch(`${API_URL}/participants/`);
+        const data = await response.json();
+        const found = data.participants.find(p => 
+            `${p.firstName} ${p.lastName}`.toLowerCase() === savedName.toLowerCase()
+        );
+
+        if (found) {
+            document.getElementById('alreadyRegistered').classList.remove('hidden');
+            document.getElementById('registrationForm').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error("Could not check registration:", error);
+    }
+}
+
 // Load participant count on page load
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -26,17 +47,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error("Could not load participant count:", error);
     }
+
+    checkAlreadyRegistered();
 });
 
 // Form submission
 document.getElementById('registrationForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
     const isRenting = document.querySelector('input[name="bike"]:checked').value === 'rent';
 
     const newParticipant = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
+        firstName: firstName,
+        lastName: lastName,
         stravaScore: parseInt(document.getElementById('stravaScore').value),
         weight: parseFloat(document.getElementById('weight').value),
         level: document.getElementById('level').value,
@@ -46,6 +71,21 @@ document.getElementById('registrationForm')?.addEventListener('submit', async fu
     };
 
     try {
+        // Check if already registered
+        const checkResponse = await fetch(`${API_URL}/participants/`);
+        const checkData = await checkResponse.json();
+        const alreadyExists = checkData.participants.find(p => 
+            p.firstName.toLowerCase() === firstName.toLowerCase() && 
+            p.lastName.toLowerCase() === lastName.toLowerCase()
+        );
+
+        if (alreadyExists) {
+            localStorage.setItem('aeroRideUser', `${firstName} ${lastName}`);
+            document.getElementById('alreadyRegistered').classList.remove('hidden');
+            document.getElementById('registrationForm').classList.add('hidden');
+            return;
+        }
+
         const response = await fetch(`${API_URL}/participants/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -59,6 +99,8 @@ document.getElementById('registrationForm')?.addEventListener('submit', async fu
             return;
         }
 
+        // Save name locally
+        localStorage.setItem('aeroRideUser', `${firstName} ${lastName}`);
         window.location.href = 'leaderboard.html';
 
     } catch (error) {
