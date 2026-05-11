@@ -54,3 +54,15 @@ def reset_participants(db: Session = Depends(get_db)):
     db.query(Participant).delete()
     db.commit()
     return {"message": "All participants cleared."}
+
+from ai.route_generator import get_surprise_routes, generate_route
+
+@router.get("/routes")
+def get_routes(level: str = "intermediate"):
+    routes = get_surprise_routes(level)
+    return {"routes": routes}
+
+@router.get("/routes/generate")
+def generate_single_route(level: str = "intermediate", duration: int = 60):
+    route = generate_route(level, duration)
+    return {"route": route}
