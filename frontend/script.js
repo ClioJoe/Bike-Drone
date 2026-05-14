@@ -1,10 +1,8 @@
 const API_URL = "/api";
 
-// Toggle bike rent size
 function toggleRentSize(isRenting) {
     const rentSizeGroup = document.getElementById('rentSizeGroup');
     const bikeSizeInput = document.getElementById('bikeSize');
-    
     if (isRenting) {
         rentSizeGroup.classList.remove('hidden');
         bikeSizeInput.required = true;
@@ -14,44 +12,29 @@ function toggleRentSize(isRenting) {
     }
 }
 
-// Check if already registered
-async function checkAlreadyRegistered() {
-    const savedName = localStorage.getItem('aeroRideUser');
-    if (!savedName) return;
-
-    try {
-        const response = await fetch(`${API_URL}/participants/`);
-        const data = await response.json();
-        const found = data.participants.find(p => 
-            `${p.firstName} ${p.lastName}`.toLowerCase() === savedName.toLowerCase()
-        );
-
-        if (found) {
-            document.getElementById('alreadyRegistered').classList.remove('hidden');
-            document.getElementById('registrationForm').classList.add('hidden');
-        }
-    } catch (error) {
-        console.error("Could not check registration:", error);
-    }
-}
-
-// Load participant count on page load
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch(`${API_URL}/participants/`);
         const data = await response.json();
+
         const countElement = document.getElementById('count');
-        if (countElement) {
-            countElement.innerText = data.total;
+        if (countElement) countElement.innerText = data.total;
+
+        const savedName = localStorage.getItem('aeroRideUser');
+        if (savedName) {
+            const found = data.participants.find(p =>
+                `${p.firstName} ${p.lastName}`.toLowerCase() === savedName.toLowerCase()
+            );
+            if (found) {
+                document.getElementById('alreadyRegistered').classList.remove('hidden');
+                document.getElementById('registrationForm').classList.add('hidden');
+            }
         }
     } catch (error) {
-        console.error("Could not load participant count:", error);
+        console.error("Could not load participants:", error);
     }
-
-    checkAlreadyRegistered();
 });
 
-// Form submission
 document.getElementById('registrationForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -71,11 +54,10 @@ document.getElementById('registrationForm')?.addEventListener('submit', async fu
     };
 
     try {
-        // Check if already registered
         const checkResponse = await fetch(`${API_URL}/participants/`);
         const checkData = await checkResponse.json();
-        const alreadyExists = checkData.participants.find(p => 
-            p.firstName.toLowerCase() === firstName.toLowerCase() && 
+        const alreadyExists = checkData.participants.find(p =>
+            p.firstName.toLowerCase() === firstName.toLowerCase() &&
             p.lastName.toLowerCase() === lastName.toLowerCase()
         );
 
@@ -99,9 +81,9 @@ document.getElementById('registrationForm')?.addEventListener('submit', async fu
             return;
         }
 
-        // Save name locally
         localStorage.setItem('aeroRideUser', `${firstName} ${lastName}`);
-        window.location.href = 'leaderboard.html';
+        localStorage.setItem('lastRegistration', JSON.stringify(newParticipant));
+        window.location.href = 'confirmation.html';
 
     } catch (error) {
         alert("Server error. Make sure the backend is running.");
