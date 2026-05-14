@@ -13,7 +13,7 @@
     <a href="index.html" style="color: #ff007f; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏠 REGISTRATION</a>
     <a href="leaderboard.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏆 LEADERBOARD</a>
     <a href="/dashboard/index.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">📊 DASHBOARD</a>
-    <a href="/frontend/routes.html">🗺️ AI ROUTES</a>
+    <a href="/frontend/routes.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🗺️ AI ROUTES</a>
     <a href="/frontend/admin.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">⚙️ ADMIN</a>
 </nav>
 
@@ -50,7 +50,22 @@
             <div class="form-group row">
                 <div class="col">
                     <label>Strava Score (Points/Level)</label>
-                    <input type="number" id="stravaScore" required>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="stravaScore" required style="flex: 1;">
+                        <button type="button" onclick="connectStrava(this)" style="
+                            background: #FC4C02;
+                            color: white;
+                            border: none;
+                            padding: 12px 16px;
+                            font-family: 'Orbitron', sans-serif;
+                            font-size: 0.7rem;
+                            cursor: pointer;
+                            border-radius: 4px;
+                            white-space: nowrap;
+                            letter-spacing: 1px;
+                            transition: all 0.3s;
+                        ">🚴 STRAVA</button>
+                    </div>
                 </div>
                 <div class="col">
                     <label>Weight (kg)</label>
@@ -97,6 +112,16 @@
     </div>
 </div>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
+<script>
+    function connectStrava(btn) {
+        const simulatedScores = [245, 189, 312, 98, 421, 167, 278, 355];
+        const randomScore = simulatedScores[Math.floor(Math.random() * simulatedScores.length)];
+        document.getElementById('stravaScore').value = randomScore;
+        btn.style.background = '#28a745';
+        btn.innerText = '✅ CONNECTED';
+        btn.disabled = true;
+    }
+</script>
 </body>
 </html>
