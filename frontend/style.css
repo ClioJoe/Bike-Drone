@@ -27,9 +27,9 @@ body {
         radial-gradient(circle at 50% 0%, #1a1a3a 0%, transparent 70%);
     min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 0;
 }
 
 body::before {
@@ -41,6 +41,15 @@ body::before {
         linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
     background-size: 30px 30px;
     z-index: -1;
+}
+
+.page-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 20px;
 }
 
 .container {
@@ -240,4 +249,20 @@ input:focus, select:focus, textarea:focus {
     text-align: left;
     padding: 12px;
     border-bottom: 2px solid var(--primary-blue);
+}
+
+.cyber-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+    font-size: 1.1rem;
+}
+
+.cyber-table tr:hover td {
+    background: rgba(255, 0, 127, 0.1);
+}
+
+.rank-number {
+    color: var(--primary-blue);
+    font-weight: bold;
+    font-family: var(--font-head);
 }

@@ -39,6 +39,31 @@
             z-index: -1;
         }
 
+        nav {
+            width: 100%;
+            background: rgba(7,18,40,0.95);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            border-bottom: 1px solid rgba(0,210,255,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        nav a {
+            color: #00d2ff;
+            text-decoration: none;
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: #ff007f; }
+        nav a.active { color: #ff007f; }
+
         .content { padding: 30px; }
 
         header {
@@ -118,11 +143,11 @@
 </head>
 <body>
 
-<nav style="background: rgba(7,18,40,0.95); padding: 12px 30px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid rgba(0,210,255,0.3); position: sticky; top: 0; z-index: 999;">
-    <a href="/frontend/index.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏠 REGISTRATION</a>
-    <a href="/frontend/leaderboard.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">🏆 LEADERBOARD</a>
-    <a href="/dashboard/index.html" style="color: #ff007f; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">📊 DASHBOARD</a>
-    <a href="/frontend/admin.html" style="color: #00d2ff; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">⚙️ ADMIN</a>
+<nav>
+    <a href="/frontend/index.html">🏠 REGISTRATION</a>
+    <a href="/frontend/leaderboard.html">🏆 LEADERBOARD</a>
+    <a href="/dashboard/index.html" class="active">📊 DASHBOARD</a>
+    <a href="/frontend/admin.html">⚙️ ADMIN</a>
 </nav>
 
 <div class="content">
@@ -170,97 +195,97 @@
     </div>
 </div>
 
-    <script>
-        const API_URL = "/api";
+<script>
+    const API_URL = "/api";
 
-        async function loadDashboard() {
-            const response = await fetch(`${API_URL}/participants/`);
-            const data = await response.json();
-            const participants = data.participants;
+    async function loadDashboard() {
+        const response = await fetch(`${API_URL}/participants/`);
+        const data = await response.json();
+        const participants = data.participants;
 
-            document.getElementById('totalCount').innerText = data.total;
-            document.getElementById('spotsLeft').innerText = 50 - data.total;
+        document.getElementById('totalCount').innerText = data.total;
+        document.getElementById('spotsLeft').innerText = 50 - data.total;
 
-            const avgStrava = participants.length > 0
-                ? Math.round(participants.reduce((sum, p) => sum + p.stravaScore, 0) / participants.length)
-                : 0;
-            document.getElementById('avgStrava').innerText = avgStrava;
+        const avgStrava = participants.length > 0
+            ? Math.round(participants.reduce((sum, p) => sum + p.stravaScore, 0) / participants.length)
+            : 0;
+        document.getElementById('avgStrava').innerText = avgStrava;
 
-            const rentCount = participants.filter(p => p.bikeStatus.includes('Renting')).length;
-            document.getElementById('rentCount').innerText = rentCount;
+        const rentCount = participants.filter(p => p.bikeStatus.includes('Renting')).length;
+        document.getElementById('rentCount').innerText = rentCount;
 
-            const levels = { Beginner: 0, Intermediate: 0, Advanced: 0 };
-            participants.forEach(p => levels[p.level]++);
+        const levels = { Beginner: 0, Intermediate: 0, Advanced: 0 };
+        participants.forEach(p => levels[p.level]++);
 
-            new Chart(document.getElementById('levelChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(levels),
-                    datasets: [{
-                        data: Object.values(levels),
-                        backgroundColor: ['#00d2ff', '#ff007f', '#7b2fff'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
-            });
+        new Chart(document.getElementById('levelChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(levels),
+                datasets: [{
+                    data: Object.values(levels),
+                    backgroundColor: ['#00d2ff', '#ff007f', '#7b2fff'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
+        });
 
-            const ownBike = participants.filter(p => p.bikeStatus === 'Own Bike').length;
-            new Chart(document.getElementById('bikeChart'), {
-                type: 'pie',
-                data: {
-                    labels: ['Own Bike', 'Renting'],
-                    datasets: [{
-                        data: [ownBike, rentCount],
-                        backgroundColor: ['#00d2ff', '#ff007f'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
-            });
+        const ownBike = participants.filter(p => p.bikeStatus === 'Own Bike').length;
+        new Chart(document.getElementById('bikeChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Own Bike', 'Renting'],
+                datasets: [{
+                    data: [ownBike, rentCount],
+                    backgroundColor: ['#00d2ff', '#ff007f'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { labels: { color: '#e0eaff' } } } }
+        });
 
-            new Chart(document.getElementById('stravaChart'), {
-                type: 'bar',
-                data: {
-                    labels: participants.map(p => `${p.firstName} ${p.lastName}`),
-                    datasets: [{
-                        label: 'Strava Score',
-                        data: participants.map(p => p.stravaScore),
-                        backgroundColor: '#00d2ff',
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    plugins: { legend: { labels: { color: '#e0eaff' } } },
-                    scales: {
-                        x: { ticks: { color: '#6b82b8' } },
-                        y: { ticks: { color: '#6b82b8' } }
-                    }
+        new Chart(document.getElementById('stravaChart'), {
+            type: 'bar',
+            data: {
+                labels: participants.map(p => `${p.firstName} ${p.lastName}`),
+                datasets: [{
+                    label: 'Strava Score',
+                    data: participants.map(p => p.stravaScore),
+                    backgroundColor: '#00d2ff',
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: { legend: { labels: { color: '#e0eaff' } } },
+                scales: {
+                    x: { ticks: { color: '#6b82b8' } },
+                    y: { ticks: { color: '#6b82b8' } }
                 }
-            });
+            }
+        });
 
-            new Chart(document.getElementById('weightChart'), {
-                type: 'bar',
-                data: {
-                    labels: participants.map(p => `${p.firstName} ${p.lastName}`),
-                    datasets: [{
-                        label: 'Weight (kg)',
-                        data: participants.map(p => p.weight),
-                        backgroundColor: '#ff007f',
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    plugins: { legend: { labels: { color: '#e0eaff' } } },
-                    scales: {
-                        x: { ticks: { color: '#6b82b8' } },
-                        y: { ticks: { color: '#6b82b8' } }
-                    }
+        new Chart(document.getElementById('weightChart'), {
+            type: 'bar',
+            data: {
+                labels: participants.map(p => `${p.firstName} ${p.lastName}`),
+                datasets: [{
+                    label: 'Weight (kg)',
+                    data: participants.map(p => p.weight),
+                    backgroundColor: '#ff007f',
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: { legend: { labels: { color: '#e0eaff' } } },
+                scales: {
+                    x: { ticks: { color: '#6b82b8' } },
+                    y: { ticks: { color: '#6b82b8' } }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        loadDashboard();
-    </script>
+    loadDashboard();
+</script>
 </body>
 </html>
